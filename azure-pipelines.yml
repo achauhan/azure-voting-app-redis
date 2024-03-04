@@ -16,8 +16,25 @@ steps:
     azureResourceManagerConnection: 'azure-resource-connection'
     subscriptionId: '67e8a973-1628-4a3c-ace4-b387f057bc85'
     action: 'Create Or Update Resource Group'
-    resourceGroupName: 'freetrial'
+    resourceGroupName: 'myapp-rg'
     location: 'East US'
     templateLocation: 'Linked artifact'
-    csmFile: '/subscriptions/67e8a973-1628-4a3c-ace4-b387f057bc85/resourceGroups/myapp-rg/providers/Microsoft.Resources/templateSpecs/template'
+    csmFile: '$(Build.SourcesDirectory)/template.json'
     deploymentMode: 'Incremental'
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'azure-resource-connection'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Get AKS credentials
+      az aks get-credentials --resource-group myapp-rg --name myapp
+
+      # Install kubectl
+      az aks install-cli
+
+      # Verify kubectl
+      kubectl version --client
+
+      # List AKS nodes
+      kubectl get nodes
