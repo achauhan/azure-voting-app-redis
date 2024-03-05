@@ -70,5 +70,7 @@ resource "azurerm_network_interface" "myvmNic" {
   ip_configuration {
     name                          = "myvmNicConfig"
     subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+
   }
 }
