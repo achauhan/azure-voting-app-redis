@@ -49,8 +49,10 @@ resource "azurerm_virtual_machine" "myvm" {
   }
 
   storage_os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    name              = "myosdisk1"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
   }
 }
 
