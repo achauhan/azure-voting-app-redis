@@ -62,6 +62,6 @@ resource "azurerm_network_interface" "myvmNic" {
 
   ip_configuration {
     name                          = "myvmNicConfig"
-    subnet_id                     = azurerm_virtual_network.myvnet.subnet[0].id
+    subnet_id                     = azurerm_virtual_network.myvnet.subnet.id
   }
 }
