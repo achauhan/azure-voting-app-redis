@@ -13,7 +13,6 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "example" {
-  count = var.example != "" ? 0 : 1
   name     = "example-resources"
   location = "East US"
 }
