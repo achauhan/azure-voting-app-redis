@@ -48,7 +48,7 @@ resource "azurerm_virtual_machine" "myvm" {
     admin_password = "mypassword"
   }
 
-  os_disk {
+  storage_os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
