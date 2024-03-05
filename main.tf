@@ -54,6 +54,13 @@ resource "azurerm_virtual_machine" "myvm" {
   }
 }
 
+resource "azurerm_subnet" "subnet" {
+  name                 = "example-subnet"
+  resource_group_name  = azurerm_resource_group.myresourcegroup.name
+  virtual_network_name = azurerm_virtual_network.myvnet.name
+  address_prefixes     = azurerm_virtual_network.myvnet.address_space
+}
+
 # Create network interface
 resource "azurerm_network_interface" "myvmNic" {
   name                = "myvmNic"
@@ -62,6 +69,6 @@ resource "azurerm_network_interface" "myvmNic" {
 
   ip_configuration {
     name                          = "myvmNicConfig"
-    subnet_id                     = azurerm_virtual_network.myvnet.subnet.id
+    subnet_id                     = azurerm_subnet.subnet.id
   }
 }
