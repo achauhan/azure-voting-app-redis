@@ -75,7 +75,7 @@
                         "caching": "ReadWrite",
                         "writeAcceleratorEnabled": false,
                         "managedDisk": {
-                            "storageAccountType": "Standard_LRS",
+                            "storageAccountType": "Standard_LRS"
                         },
                         "deleteOption": "Detach",
                         "diskSizeGB": 127
