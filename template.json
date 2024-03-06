@@ -85,7 +85,7 @@
                 "osProfile": {
                     "computerName": "[parameters('virtualMachines_example_machine_name')]",
                     "adminUsername": "adminuser",
-                    "adminPassword": "adminuser",
+                    "adminPassword": "Pa$$w0rd",
                     "windowsConfiguration": {
                         "provisionVMAgent": true,
                         "enableAutomaticUpdates": true,
