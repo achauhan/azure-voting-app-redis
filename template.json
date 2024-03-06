@@ -76,7 +76,6 @@
                         "writeAcceleratorEnabled": false,
                         "managedDisk": {
                             "storageAccountType": "Standard_LRS",
-                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_example_machine_name'), '_OsDisk_1_81af4d80f90b4a6cb73e47f7e2b38519'))]"
                         },
                         "deleteOption": "Detach",
                         "diskSizeGB": 127
