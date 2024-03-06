@@ -2,359 +2,178 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "registries_acacr_name": {
-            "defaultValue": "acacr",
+        "networkInterfaces_example_nic_name": {
+            "defaultValue": "example-nic",
             "type": "String"
         },
-        "managedClusters_myapp_name": {
-            "defaultValue": "myapp",
+        "virtualMachines_example_machine_name": {
+            "defaultValue": "example-machine",
             "type": "String"
         },
-        "dataCollectionRules_MSCI_eastus_myapp_name": {
-            "defaultValue": "MSCI-eastus-myapp",
-            "type": "String"
-        },
-        "workspaces_DefaultWorkspace_67e8a973_1628_4a3c_ace4_b387f057bc85_EUS_externalid": {
-            "defaultValue": "/subscriptions/67e8a973-1628-4a3c-ace4-b387f057bc85/resourceGroups/DefaultResourceGroup-EUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-67e8a973-1628-4a3c-ace4-b387f057bc85-EUS",
-            "type": "String"
-        },
-        "publicIPAddresses_8a920872_d778_4fcd_9f66_ba02468b9fa0_externalid": {
-            "defaultValue": "/subscriptions/67e8a973-1628-4a3c-ace4-b387f057bc85/resourceGroups/MC_myapp-rg_myapp_eastus/providers/Microsoft.Network/publicIPAddresses/8a920872-d778-4fcd-9f66-ba02468b9fa0",
-            "type": "String"
-        },
-        "userAssignedIdentities_myapp_agentpool_externalid": {
-            "defaultValue": "/subscriptions/67e8a973-1628-4a3c-ace4-b387f057bc85/resourceGroups/MC_myapp-rg_myapp_eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myapp-agentpool",
+        "virtualNetworks_example_network_name": {
+            "defaultValue": "example-network",
             "type": "String"
         }
     },
     "variables": {},
     "resources": [
         {
-            "type": "Microsoft.ContainerRegistry/registries",
-            "apiVersion": "2023-11-01-preview",
-            "name": "[parameters('registries_acacr_name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2023-06-01",
+            "name": "[parameters('virtualNetworks_example_network_name')]",
             "location": "eastus",
-            "sku": {
-                "name": "Basic",
-                "tier": "Basic"
-            },
             "properties": {
-                "adminUserEnabled": false,
-                "policies": {
-                    "quarantinePolicy": {
-                        "status": "disabled"
-                    },
-                    "trustPolicy": {
-                        "type": "Notary",
-                        "status": "disabled"
-                    },
-                    "retentionPolicy": {
-                        "days": 7,
-                        "status": "disabled"
-                    },
-                    "exportPolicy": {
-                        "status": "enabled"
-                    },
-                    "azureADAuthenticationAsArmPolicy": {
-                        "status": "enabled"
-                    },
-                    "softDeletePolicy": {
-                        "retentionDays": 7,
-                        "status": "disabled"
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "dhcpOptions": {
+                    "dnsServers": []
+                },
+                "subnets": [
+                    {
+                        "name": "internal",
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_example_network_name'), 'internal')]",
+                        "properties": {
+                            "addressPrefix": "10.0.2.0/24",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
                     }
-                },
-                "encryption": {
-                    "status": "disabled"
-                },
-                "dataEndpointEnabled": false,
-                "publicNetworkAccess": "Enabled",
-                "networkRuleBypassOptions": "AzureServices",
-                "zoneRedundancy": "Disabled",
-                "anonymousPullEnabled": false,
-                "metadataSearch": "Disabled"
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
             }
         },
         {
-            "type": "Microsoft.ContainerService/managedClusters",
-            "apiVersion": "2023-08-02-preview",
-            "name": "[parameters('managedClusters_myapp_name')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2023-03-01",
+            "name": "[parameters('virtualMachines_example_machine_name')]",
             "location": "eastus",
-            "sku": {
-                "name": "Base",
-                "tier": "Free"
-            },
-            "identity": {
-                "type": "SystemAssigned"
-            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_example_nic_name'))]"
+            ],
             "properties": {
-                "kubernetesVersion": "1.27",
-                "dnsPrefix": "[concat(parameters('managedClusters_myapp_name'), '-', parameters('managedClusters_myapp_name'), '-rg-67e8a9')]",
-                "agentPoolProfiles": [
-                    {
-                        "name": "nodepool1",
-                        "count": 0,
-                        "vmSize": "Standard_DS2_v2",
-                        "osDiskSizeGB": 128,
-                        "osDiskType": "Managed",
-                        "kubeletDiskType": "OS",
-                        "maxPods": 110,
-                        "type": "VirtualMachineScaleSets",
-                        "enableAutoScaling": false,
-                        "powerState": {
-                            "code": "Stopped"
+                "hardwareProfile": {
+                    "vmSize": "Standard_F2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_example_machine_name'), '_OsDisk_1_81af4d80f90b4a6cb73e47f7e2b38519')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "writeAcceleratorEnabled": false,
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_example_machine_name'), '_OsDisk_1_81af4d80f90b4a6cb73e47f7e2b38519'))]"
                         },
-                        "orchestratorVersion": "1.27.9",
-                        "enableNodePublicIP": false,
-                        "mode": "System",
-                        "enableEncryptionAtHost": false,
-                        "enableUltraSSD": false,
-                        "osType": "Linux",
-                        "osSKU": "Ubuntu",
-                        "upgradeSettings": {},
-                        "enableFIPS": false,
-                        "securityProfile": {
-                            "sshAccess": "LocalUser"
+                        "deleteOption": "Detach",
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_example_machine_name')]",
+                    "adminUsername": "adminuser",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true,
+                        "patchSettings": {
+                            "patchMode": "AutomaticByOS",
+                            "assessmentMode": "ImageDefault",
+                            "enableHotpatching": false
+                        },
+                        "winRM": {
+                            "listeners": []
+                        },
+                        "enableVMAgentPlatformUpdates": false
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_example_nic_name'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                },
+                "priority": "Regular",
+                "extensionsTimeBudget": "PT1H30M"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2023-06-01",
+            "name": "[parameters('networkInterfaces_example_nic_name')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_example_network_name'), 'internal')]"
+            ],
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "internal",
+                        "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_example_nic_name')), '/ipConfigurations/internal')]",
+                        "etag": "W/\"4f8cf202-4253-43fd-b9bd-f7924ecfcc09\"",
+                        "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "privateIPAddress": "10.0.2.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_example_network_name'), 'internal')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
                         }
                     }
                 ],
-                "linuxProfile": {
-                    "adminUsername": "azureuser",
-                    "ssh": {
-                        "publicKeys": [
-                            {
-                                "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmlyk6eLmtiV8pOKR9vpITomZvPlS7nihVUpjWA9IrZhDbFL79RdWEstXBvZ/lH78o9D1rSRw+f0/jz/pT1HUfQi5/ghIeEbxiHvv46giaAQ2ITR9Ljvhy49ALgRpV/+wpxLG9ChojCcCDGu0WotnwVSbI2gW8bOJWft4Vn0bdVO3pRrFIMdYsTXgSBMxGLni4lObYooOi5P5KwBrVsHMIVnBQIzqSL4XwvzMlLH5uPSKf8UVZzNVDMC9M+EKBgYGJ9yIa4QVYyol8ZCZYQPXjPNf8xqZbtfcNh/BehNNZXJ/3fjXa6aGqL4RqHJN3EWaNo1Y6Wn/yVC2Qliy+styf"
-                            }
-                        ]
-                    }
+                "dnsSettings": {
+                    "dnsServers": []
                 },
-                "servicePrincipalProfile": {
-                    "clientId": "msi"
-                },
-                "addonProfiles": {
-                    "omsagent": {
-                        "enabled": true,
-                        "config": {
-                            "logAnalyticsWorkspaceResourceID": "[parameters('workspaces_DefaultWorkspace_67e8a973_1628_4a3c_ace4_b387f057bc85_EUS_externalid')]",
-                            "useAADAuth": "true"
-                        }
-                    }
-                },
-                "nodeResourceGroup": "[concat('MC_', parameters('managedClusters_myapp_name'), '-rg_', parameters('managedClusters_myapp_name'), '_eastus')]",
-                "enableRBAC": true,
-                "supportPlan": "KubernetesOfficial",
-                "networkProfile": {
-                    "networkPlugin": "kubenet",
-                    "networkPolicy": "none",
-                    "loadBalancerSku": "Standard",
-                    "loadBalancerProfile": {
-                        "managedOutboundIPs": {
-                            "count": 1
-                        },
-                        "effectiveOutboundIPs": [
-                            {
-                                "id": "[parameters('publicIPAddresses_8a920872_d778_4fcd_9f66_ba02468b9fa0_externalid')]"
-                            }
-                        ],
-                        "backendPoolType": "nodeIPConfiguration"
-                    },
-                    "podCidr": "10.244.0.0/16",
-                    "serviceCidr": "10.0.0.0/16",
-                    "dnsServiceIP": "10.0.0.10",
-                    "outboundType": "loadBalancer",
-                    "podCidrs": [
-                        "10.244.0.0/16"
-                    ],
-                    "serviceCidrs": [
-                        "10.0.0.0/16"
-                    ],
-                    "ipFamilies": [
-                        "IPv4"
-                    ]
-                },
-                "identityProfile": {
-                    "kubeletidentity": {
-                        "resourceId": "[parameters('userAssignedIdentities_myapp_agentpool_externalid')]",
-                        "clientId": "a88b5649-c558-4b4e-acb3-47dd841d5bdb",
-                        "objectId": "b0d62bb7-64d4-4966-a303-0d2f57eaea5a"
-                    }
-                },
-                "autoUpgradeProfile": {
-                    "nodeOSUpgradeChannel": "NodeImage"
-                },
-                "disableLocalAccounts": false,
-                "securityProfile": {},
-                "storageProfile": {
-                    "diskCSIDriver": {
-                        "enabled": true,
-                        "version": "v1"
-                    },
-                    "fileCSIDriver": {
-                        "enabled": true
-                    },
-                    "snapshotController": {
-                        "enabled": true
-                    }
-                },
-                "oidcIssuerProfile": {
-                    "enabled": false
-                },
-                "workloadAutoScalerProfile": {},
-                "metricsProfile": {
-                    "costAnalysis": {
-                        "enabled": false
-                    }
-                }
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard",
+                "auxiliaryMode": "None",
+                "auxiliarySku": "None"
             }
         },
         {
-            "type": "Microsoft.Insights/dataCollectionRules",
-            "apiVersion": "2022-06-01",
-            "name": "[parameters('dataCollectionRules_MSCI_eastus_myapp_name')]",
-            "location": "eastus",
-            "kind": "Linux",
-            "properties": {
-                "dataSources": {
-                    "extensions": [
-                        {
-                            "streams": [
-                                "Microsoft-ContainerInsights-Group-Default"
-                            ],
-                            "extensionName": "ContainerInsights",
-                            "extensionSettings": {},
-                            "name": "ContainerInsightsExtension"
-                        }
-                    ]
-                },
-                "destinations": {
-                    "logAnalytics": [
-                        {
-                            "workspaceResourceId": "[parameters('workspaces_DefaultWorkspace_67e8a973_1628_4a3c_ace4_b387f057bc85_EUS_externalid')]",
-                            "name": "la-workspace"
-                        }
-                    ]
-                },
-                "dataFlows": [
-                    {
-                        "streams": [
-                            "Microsoft-ContainerInsights-Group-Default"
-                        ],
-                        "destinations": [
-                            "la-workspace"
-                        ]
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
-            "apiVersion": "2023-11-01-preview",
-            "name": "[concat(parameters('registries_acacr_name'), '/_repositories_admin')]",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2023-06-01",
+            "name": "[concat(parameters('virtualNetworks_example_network_name'), '/internal')]",
             "dependsOn": [
-                "[resourceId('Microsoft.ContainerRegistry/registries', parameters('registries_acacr_name'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_example_network_name'))]"
             ],
             "properties": {
-                "description": "Can perform all read, write and delete operations on the registry",
-                "actions": [
-                    "repositories/*/metadata/read",
-                    "repositories/*/metadata/write",
-                    "repositories/*/content/read",
-                    "repositories/*/content/write",
-                    "repositories/*/content/delete"
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
-            "apiVersion": "2023-11-01-preview",
-            "name": "[concat(parameters('registries_acacr_name'), '/_repositories_pull')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ContainerRegistry/registries', parameters('registries_acacr_name'))]"
-            ],
-            "properties": {
-                "description": "Can pull any repository of the registry",
-                "actions": [
-                    "repositories/*/content/read"
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
-            "apiVersion": "2023-11-01-preview",
-            "name": "[concat(parameters('registries_acacr_name'), '/_repositories_pull_metadata_read')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ContainerRegistry/registries', parameters('registries_acacr_name'))]"
-            ],
-            "properties": {
-                "description": "Can perform all read operations on the registry",
-                "actions": [
-                    "repositories/*/content/read",
-                    "repositories/*/metadata/read"
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
-            "apiVersion": "2023-11-01-preview",
-            "name": "[concat(parameters('registries_acacr_name'), '/_repositories_push')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ContainerRegistry/registries', parameters('registries_acacr_name'))]"
-            ],
-            "properties": {
-                "description": "Can push to any repository of the registry",
-                "actions": [
-                    "repositories/*/content/read",
-                    "repositories/*/content/write"
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
-            "apiVersion": "2023-11-01-preview",
-            "name": "[concat(parameters('registries_acacr_name'), '/_repositories_push_metadata_write')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ContainerRegistry/registries', parameters('registries_acacr_name'))]"
-            ],
-            "properties": {
-                "description": "Can perform all read and write operations on the registry",
-                "actions": [
-                    "repositories/*/metadata/read",
-                    "repositories/*/metadata/write",
-                    "repositories/*/content/read",
-                    "repositories/*/content/write"
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.ContainerService/managedClusters/agentPools",
-            "apiVersion": "2023-08-02-preview",
-            "name": "[concat(parameters('managedClusters_myapp_name'), '/nodepool1')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ContainerService/managedClusters', parameters('managedClusters_myapp_name'))]"
-            ],
-            "properties": {
-                "count": 0,
-                "vmSize": "Standard_DS2_v2",
-                "osDiskSizeGB": 128,
-                "osDiskType": "Managed",
-                "kubeletDiskType": "OS",
-                "maxPods": 110,
-                "type": "VirtualMachineScaleSets",
-                "enableAutoScaling": false,
-                "powerState": {
-                    "code": "Stopped"
-                },
-                "orchestratorVersion": "1.27.9",
-                "enableNodePublicIP": false,
-                "mode": "System",
-                "enableEncryptionAtHost": false,
-                "enableUltraSSD": false,
-                "osType": "Linux",
-                "osSKU": "Ubuntu",
-                "upgradeSettings": {},
-                "enableFIPS": false,
-                "securityProfile": {
-                    "sshAccess": "LocalUser"
-                }
+                "addressPrefix": "10.0.2.0/24",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
             }
         }
     ]
