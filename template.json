@@ -99,8 +99,7 @@
                         "enableVMAgentPlatformUpdates": false
                     },
                     "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": false
+                    "allowExtensionOperations": true
                 },
                 "networkProfile": {
                     "networkInterfaces": [
