@@ -100,7 +100,7 @@
                     },
                     "secrets": [],
                     "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "requireGuestProvisionSignal": false
                 },
                 "networkProfile": {
                     "networkInterfaces": [
