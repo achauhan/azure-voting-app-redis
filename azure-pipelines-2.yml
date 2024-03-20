@@ -7,11 +7,11 @@ pool:
 steps:
 - task: AzureKeyVault@2
   inputs:
-    azureSubscription: '67e8a973-1628-4a3c-ace4-b387f057bc85'
+    azureSubscription: 'azure-resource-connection'
     KeyVaultName: 'testkvac'
     SecretsFilter: '*'
     RunAsPreJob: false
 
 - task: CmdLine@2
   inputs:
-    script: 'echo $(Password) 
+    script: 'echo $(Password)'
